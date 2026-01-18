@@ -43,7 +43,7 @@ output_dir_per_ticker: str = "."      # used only if write_one_csv_per_ticker=Tr
 # -----------------------
 def load_tickers() -> List[str]:
     if ticker_file is None:
-        tickers: List[str] = ["AAPL", "NVDA"]  # ["AAPL", "MSFT", "AMZN"]
+        tickers: List[str] = ["AAPL", "MSFT", "AMZN"]
     else:
         tickers = open(ticker_file, "r").readlines()
         tickers = [x.strip() for x in tickers if x.strip()]
@@ -277,3 +277,4 @@ if __name__ == "__main__":
     finally:
         elapsed = time.perf_counter() - t_start
         print(f"time elapsed: {elapsed:.3f} seconds")
+
