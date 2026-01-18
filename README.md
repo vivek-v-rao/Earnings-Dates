@@ -1,3 +1,5 @@
 # Earnings-Dates
 Get historical dates of earning announcements, EPS estimates, and actual EPS from Yahoo Finance. Run `python xearnings_bulk.py` to create `earnings_dates_all.csv`. `itot_tickers_20260115.txt` has the symbols of the stocks owned by the iShares Core S&P Total US Stock Market ETF (ITOT) as of 2026-01-15. It takes about 3s per stock to get data for quarterly earnings from 2002 through 2025.
 
+The script `xsummarize_earnings.py` reads the CSV data file created by `xearnings_bulk.py` and summarizes the data by stock, creating `earnings_summary.csv`, which has the # of earnings dates, the first and last earnings dates, the median, mean, and standard deviation of earnings surprises, the # of positive and negative earnings surprises, the CAGR of EPS, and the median, min, and max # of days between earnings dates. For almost all stocks the median # of days between earnings dates is close to 90, since companies report earnings quarterly in the U.S. In many case the min days between earnings dates is much smaller than this. I don't know if these cases correspond to earnings restatements or data errors.
+
