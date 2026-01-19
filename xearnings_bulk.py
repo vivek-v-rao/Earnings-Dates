@@ -19,11 +19,10 @@ import pandas as pd
 import yfinance as yf
 import multiprocessing as mp
 
-
 # -----------------------
 # User settings
 # -----------------------
-max_tickers = None
+max_tickers = 100
 ticker_file = "itot_tickers_20260115.txt"
 start_date: str = "2002-01-01"         # YYYY-MM-DD
 chunk_size: int = 100                  # rows per page
@@ -34,7 +33,7 @@ max_pages: Optional[int] = None        # set to an int to cap paging (e.g. 40)
 max_seconds_per_ticker: float = 60.0
 
 write_one_csv_per_ticker: bool = False
-output_csv_all: str = "earnings_dates_all.csv"
+output_csv_all: str = "temp_earnings_dates.csv"
 output_dir_per_ticker: str = "."      # used only if write_one_csv_per_ticker=True
 
 
@@ -43,7 +42,7 @@ output_dir_per_ticker: str = "."      # used only if write_one_csv_per_ticker=Tr
 # -----------------------
 def load_tickers() -> List[str]:
     if ticker_file is None:
-        tickers: List[str] = ["AAPL", "MSFT", "AMZN"]
+        tickers: List[str] = ["AAPL", "NVDA"]  # ["AAPL", "MSFT", "AMZN"]
     else:
         tickers = open(ticker_file, "r").readlines()
         tickers = [x.strip() for x in tickers if x.strip()]
@@ -265,6 +264,20 @@ def main() -> None:
     ]
     cols = [c for c in desired if c in df_all.columns] + [c for c in df_all.columns if c not in desired]
     df_all = df_all.loc[:, cols]
+    # days since prior earnings date (calendar days) within each ticker
+    # (first earnings date per ticker stays blank/NA)
+    _tmp = df_all[["ticker", "earnings_datetime_utc", "earnings_date"]].copy()
+    _tmp = _tmp.sort_values(["ticker", "earnings_datetime_utc"])
+
+    _days = (
+        pd.to_datetime(_tmp["earnings_date"], errors="coerce")
+        .groupby(_tmp["ticker"])
+        .diff()
+        .dt.days
+        .astype("Int64")
+    )
+    df_all["days_since"] = _days.reindex(df_all.index)
+
 
     df_all.to_csv(output_csv_all, index=False)
     print(f"\nWrote {output_csv_all} with {len(tickers)} symbols, {len(df_all)} total rows.")
@@ -277,4 +290,3 @@ if __name__ == "__main__":
     finally:
         elapsed = time.perf_counter() - t_start
         print(f"time elapsed: {elapsed:.3f} seconds")
-
